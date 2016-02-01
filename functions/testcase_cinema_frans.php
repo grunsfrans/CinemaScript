@@ -14,6 +14,7 @@ class FCinema
     $this->nrOfSeats = $nrOfSeats;
     $this->createSeats();
     $this->determineAvailableSeatGroups();
+
   }
 
 
@@ -30,6 +31,7 @@ class FCinema
 
   private function determineAvailableSeatGroups() {
     $firstSeatOfGroup = -1 ;
+    $seatGroupSize = 0;
 
     for ($i = 0; $i < $this->nrOfSeats; $i++) {
     	
@@ -38,7 +40,8 @@ class FCinema
       if ( $currentSeat == 'free' && $firstSeatOfGroup == -1 ) {
         $firstSeatOfGroup = $i;
         if ($i === $this->nrOfSeats -1){
-          $this->availableSeatGroups[$firstSeatOfGroup] = 1;
+          $seatGroupSize = 1;
+          $this->availableSeatGroups[$firstSeatOfGroup] = $seatGroupSize;
         }
       } 
       elseif ($currentSeat == 'free' && $firstSeatOfGroup != -1 && $i == $this->nrOfSeats -1 )  {
@@ -52,18 +55,20 @@ class FCinema
         $firstSeatOfGroup = -1;
       }
     }
+    arsort($this->availableSeatGroups);
     echo count($this->availableSeatGroups) . " seatgroups \n\n";
-    // print_r($this->availableSeatGroups);
+
   }
+
+
 
 
   public function getSeatsForVisitors($groupSize) {
     if ( $this->enoughSeatsAvailable($groupSize) ) {
+      echo "\n\nTe plaatsen groepgrootte: " . $groupSize . " in zaal van ".$this->nrOfSeats."\n\n";
       $time_start = microtime(true);
       $test = $this->reserveSeatsForVisitors($groupSize);
       $time_end = microtime(true); 
-      //print_r($test);
-      //echo $time_end - $time_start . " seconden voor een groep van size: " . $groupSize . " in een bioscoop met size: " . $this->nrOfSeats;
     }
     else{
       echo 'Not enough seats available for this group';
@@ -73,60 +78,66 @@ class FCinema
 
 
   private function reserveSeatsForVisitors($groupSize) {
-    //echo "groupsize: " . $groupSize . " recurse  \n\n\n" . print_r($this->availableSeatGroups) ;
-    $counter = 0;
-    $currentGroupSize = $groupSize;
-    while ($currentGroupSize > 0) {
+   
+   
+    //RECURSIVE
+    if ($groupSize < 1) {
+        return $this->seatsToReserve;
+    }
+    else{
       $group = $this->getBestSeatGroupToPlaceVisitors($groupSize);
-      $chosenGroupSize =
       $amount = $groupSize >= $this->availableSeatGroups[$group] ? $this->availableSeatGroups[$group] : $groupSize; 
+       //echo " place " . $amount ." in group: " . $group . "\n";
       $this->seatsToReserve += array_slice($this->seats, $group, $amount, true );
       unset($this->availableSeatGroups[$group]);
-      $currentGroupSize -= $amount;
-      $counter += 1;
+      return $this->reserveSeatsForVisitors($groupSize-$amount);
     }
-	echo $counter . " whiles\n\n";
-   
-   
-    // RECURSIVE
-    // if ($groupSize < 1) {
-    //     return $this->seatsToReserve;
-    // }
-    // else{
-    //   $group = $this->getBestSeatGroupToPlaceVisitors($groupSize);
-    //   $amount = $groupSize >= $this->availableSeatGroups[$group] ? $this->availableSeatGroups[$group] : $groupSize; 
-    //   $this->seatsToReserve += array_slice($this->seats, $group, $amount, true );
-    //   unset($this->availableSeatGroups[$group]);
-    //   return $this->reserveSeatsForVisitors($groupSize-$amount);
-    // }
     
     
   }
 
 
   private function getBestSeatGroupToPlaceVisitors($groupSize) {
-    $counter = 0;
-    $bestGroup = -1;
-    foreach ($this->availableSeatGroups as $key => $value) {
-      $currentBestGroupSize = $this->availableSeatGroups[$bestGroup];
-      if ( $bestGroup === -1 || ( $value > $currentBestGroupSize && $currentBestGroupSize !== $groupSize ) ) { 
-        $bestGroup = $key;
-        if( $groupSize <= $value) {
-        //	echo "break : in if \n\n";
-          break;
-        }
-      }
-      elseif ( $groupSize <= $value ) {
-        $bestGroup = $key;
-        //echo "break : in elseif \n\n";
-        break;
-      }
-      $counter += 1;
+    $firstGroupSize = array_values($this->availableSeatGroups)[0];
+    if ( $groupSize >= $firstGroupSize ){
+      reset($this->availableSeatGroups);
+      $group = key($this->availableSeatGroups);
+      return $group;
     }
-    //echo "best group: " . $bestGroup . " with size: " . $this->availableSeatGroups[$bestGroup] . "\n\n";
-    //echo $counter . "\n";
-    return $bestGroup; 
+
+    $group=$this->nrOfSeats;
+    foreach ($this->availableSeatGroups as $key => $value) {
+      if($key < $group && $groupSize <= $value){
+        $group = $key;
+      }
+    }
+    return $group;
+
   }
+
+  // private function getBestSeatGroupToPlaceVisitors($groupSize) {
+  //   $counter = 0;
+  //   $bestGroup = -1;
+  //   foreach ($this->availableSeatGroups as $key => $value) {
+  //     $currentBestGroupSize = $bestGroup == -1 ? 0 :  $this->availableSeatGroups[$bestGroup];
+  //     if ( $value > $currentBestGroupSize && $currentBestGroupSize !== $groupSize  ) { 
+  //       $bestGroup = $key;
+  //       if( $groupSize <= $value) {
+  //       //	echo "break : in if \n\n";
+  //         break;
+  //       }
+  //     }
+  //     elseif ( $groupSize <= $value ) {
+  //       $bestGroup = $key;
+  //       //echo "break : in elseif \n\n";
+  //       break;
+  //     }
+  //     $counter += 1;
+  //   }
+  //   //echo "best group: " . $bestGroup . " with size: " . $this->availableSeatGroups[$bestGroup] . "\n\n";
+  //   //echo $counter . "\n";
+  //   return $bestGroup; 
+  // }
 
 
   private function enoughSeatsAvailable($groupSize){

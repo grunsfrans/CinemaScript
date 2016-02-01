@@ -32,11 +32,13 @@ class Cinema
                 if ($groupSize >= $this->visitors) {
                     $groupSize--;
                     $this->putInSeats(($i-$groupSize), $this->visitors);
+                    echo count($this->availableSeatsGroups) . " seatgroups \n\n";
                     return true;
                 }
             }
         }
         $this->availableSeatsGroups[($i-$groupSize)] = $groupSize;
+        echo count($this->availableSeatsGroups) . " seatgroups \n\n";
         return false;
     }
 
@@ -87,7 +89,7 @@ class Cinema
 
     public function findBestPositions()
     {
-
+		$counter = 0;
         $queue = $this->visitors;
         while (list($key, $value) = each($this->availableSeatsGroups)) {
             $this->putInSeats($key, $value);
@@ -95,7 +97,9 @@ class Cinema
             if ($queue <= 0) {
                 break;
             }
+            $counter += 1;
         }
+        echo $counter . " whiles \n\n";
     }
 
     public function putInSeats($start, $amount) {

@@ -7,13 +7,13 @@ class FCinema
   private $seats                = [];
   private $availableSeatGroups  = [];
   private $seatsToReserve       = [];
-  //private $visitorGroup         = 0;
 
 
   public function __construct($nrOfSeats = 20){
     $this->nrOfSeats = $nrOfSeats;
     $this->createSeats();
     $this->determineAvailableSeatGroups();
+    $this->sortAvailableSeatGroupsByDescValue();
 
   }
 
@@ -37,28 +37,37 @@ class FCinema
     	
       $currentSeat = $this->seats[$i]; 
        
-      if ( $currentSeat == 'free' && $firstSeatOfGroup == -1 ) {
+      if ( $currentSeat == 'free' && $firstSeatOfGroup == -1 ) {  // Start of group
         $firstSeatOfGroup = $i;
-        if ($i === $this->nrOfSeats -1){
+        if ($i === $this->nrOfSeats -1){  //One avaiilable seat at the end of $seats
           $seatGroupSize = 1;
           $this->availableSeatGroups[$firstSeatOfGroup] = $seatGroupSize;
         }
       } 
-      elseif ($currentSeat == 'free' && $firstSeatOfGroup != -1 && $i == $this->nrOfSeats -1 )  {
+      elseif ($currentSeat == 'free' && $firstSeatOfGroup != -1 && $i == $this->nrOfSeats -1 )  {   // Seatgroup ends at end of $seats
         $seatGroupSize =  $i+1 - $firstSeatOfGroup;
         $this->availableSeatGroups[$firstSeatOfGroup] = $seatGroupSize;
         $firstSeatOfGroup = -1;
       }
-      elseif ($currentSeat == 'taken' && $firstSeatOfGroup != -1) {
+      elseif ($currentSeat == 'taken' && $firstSeatOfGroup != -1) {   // Seatgroup in between taken seats
         $seatGroupSize =  $i - $firstSeatOfGroup;
         $this->availableSeatGroups[$firstSeatOfGroup] = $seatGroupSize;
         $firstSeatOfGroup = -1;
       }
     }
-    arsort($this->availableSeatGroups);
+    
     echo count($this->availableSeatGroups) . " seatgroups \n\n";
 
   }
+
+
+  private function sortAvailableSeatGroupsByDescValue(){
+    arsort($this->availableSeatGroups);
+  }
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//     end of initialization     ^^
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 
@@ -77,9 +86,13 @@ class FCinema
   }
 
 
-  private function reserveSeatsForVisitors($groupSize) {
-   
-   
+  private function enoughSeatsAvailable($groupSize){
+    $seatUsage = array_count_values($this->seats);
+    return ($seatUsage['free'] >= $groupSize ? true : false);
+  }
+
+
+  private function reserveSeatsForVisitors($groupSize) { 
     //RECURSIVE
     if ($groupSize < 1) {
         return $this->seatsToReserve;
@@ -115,35 +128,7 @@ class FCinema
 
   }
 
-  // private function getBestSeatGroupToPlaceVisitors($groupSize) {
-  //   $counter = 0;
-  //   $bestGroup = -1;
-  //   foreach ($this->availableSeatGroups as $key => $value) {
-  //     $currentBestGroupSize = $bestGroup == -1 ? 0 :  $this->availableSeatGroups[$bestGroup];
-  //     if ( $value > $currentBestGroupSize && $currentBestGroupSize !== $groupSize  ) { 
-  //       $bestGroup = $key;
-  //       if( $groupSize <= $value) {
-  //       //	echo "break : in if \n\n";
-  //         break;
-  //       }
-  //     }
-  //     elseif ( $groupSize <= $value ) {
-  //       $bestGroup = $key;
-  //       //echo "break : in elseif \n\n";
-  //       break;
-  //     }
-  //     $counter += 1;
-  //   }
-  //   //echo "best group: " . $bestGroup . " with size: " . $this->availableSeatGroups[$bestGroup] . "\n\n";
-  //   //echo $counter . "\n";
-  //   return $bestGroup; 
-  // }
-
-
-  private function enoughSeatsAvailable($groupSize){
-    $seatUsage = array_count_values($this->seats);
-    return ($seatUsage['free'] >= $groupSize ? true : false);
-  }
+  
 
 
 

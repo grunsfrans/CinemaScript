@@ -19,16 +19,17 @@ require 'functions/testcase_cinema_frans.php';
 <pre>
 <?php
 
-$roomSize = 500000;
-$groupSize = 5000;
+$roomSize = 20;
+$groupSize = 11;
   
 $time_start_cinema = microtime(true);
-$cinema = new FCinema($roomSize);
+$cinema = new Cinema($roomSize);
 $time_end_cinema = microtime(true);
 echo $time_end_cinema - $time_start_cinema . " seconden initaliseren \n\n" ;
  
  $time_start = microtime(true);
- $cinema->getSeatsForVisitors($groupSize);
+ $cinema->giveSeatNumbers($groupSize);
+ // $cinema->getSeatsForVisitors($groupSize);
  $time_end = microtime(true);
  
  echo "\n\nDe groep plaatsen duurde " . ($time_end - $time_start) . " seconden \n\n" ;

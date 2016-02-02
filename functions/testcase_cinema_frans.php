@@ -14,6 +14,15 @@ class FCinema
     $this->createSeats();
     $this->determineAvailableSeatGroups();
     $this->sortAvailableSeatGroupsByDescValue();
+    //print_r($this->availableSeatGroups);
+
+    // $this->availableSeatGroups = array_reverse($this->availableSeatGroups, true);
+    // reset($this->availableSeatGroups);
+    //  do {
+    // list($key, $value) = each($this->availableSeatGroups); 
+    // echo $key ." " . $value . "\n";
+    // prev($this->availableSeatGroups);
+    // } while (next($this->availableSeatGroups)!=FALSE);
 
   }
 
@@ -100,7 +109,7 @@ class FCinema
     else{
       $group = $this->getBestSeatGroupToPlaceVisitors($groupSize);
       $amount = $groupSize >= $this->availableSeatGroups[$group] ? $this->availableSeatGroups[$group] : $groupSize; 
-       //echo " place " . $amount ." in group: " . $group . "\n";
+      //echo " place " . $amount ." in group starting at: " . $group . "\n";
       $this->seatsToReserve += array_slice($this->seats, $group, $amount, true );
       unset($this->availableSeatGroups[$group]);
       return $this->reserveSeatsForVisitors($groupSize-$amount);
@@ -111,21 +120,24 @@ class FCinema
 
 
   private function getBestSeatGroupToPlaceVisitors($groupSize) {
-    $firstGroupSize = array_values($this->availableSeatGroups)[0];
-    if ( $groupSize >= $firstGroupSize ){
-      reset($this->availableSeatGroups);
+    reset($this->availableSeatGroups);
+    $firstGroupSize = current($this->availableSeatGroups);
+    echo $firstGroupSize . " first group size\n";
+    if ( $groupSize > $firstGroupSize ){
       $group = key($this->availableSeatGroups);
       return $group;
     }
 
-    $group=$this->nrOfSeats;
-    foreach ($this->availableSeatGroups as $key => $value) {
-      if($key < $group && $groupSize <= $value){
-        $group = $key;
-      }
-    }
-    return $group;
 
+    ksort($this->availableSeatGroups);
+    reset($this->availableSeatGroups);
+     do {
+      list($key, $value) = each($this->availableSeatGroups); 
+      if ( $groupSize <= $value){
+        return $group = $key;
+      }
+    prev($this->availableSeatGroups);
+    } while (next($this->availableSeatGroups)!=FALSE);
   }
 
   

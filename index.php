@@ -23,14 +23,14 @@ $roomSize = 20;
 $groupSize = 11;
   
 $time_start_cinema = microtime(true);
-$cinema = new Cinema($roomSize);
+$cinema = new FCinema($roomSize);
 $time_end_cinema = microtime(true);
 echo $time_end_cinema - $time_start_cinema . " seconden initaliseren \n\n" ;
- 
- $time_start = microtime(true);
- $cinema->giveSeatNumbers($groupSize);
- // $cinema->getSeatsForVisitors($groupSize);
- $time_end = microtime(true);
+
+$time_start = microtime(true);
+ //$cinema->giveSeatNumbers($groupSize);
+$cinema->getSeatsForVisitors($groupSize);
+$time_end = microtime(true);
  
  echo "\n\nDe groep plaatsen duurde " . ($time_end - $time_start) . " seconden \n\n" ;
   

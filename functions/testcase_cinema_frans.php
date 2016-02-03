@@ -22,9 +22,7 @@ class FCinema
 
 
   private function createSeatsAndDetermineAvailableGroups(){
-    
     $counter        = 0;
-
     for ($i = 0; $i < $this->nrOfSeats; $i++) {
 
       if (rand(1, 4) == 1) {
@@ -39,9 +37,7 @@ class FCinema
     }
     if ($counter > 0 ){
       $this->availableSeatGroups[$i-$counter] = $counter;
-    } 
-
-    
+    }
     echo count($this->availableSeatGroups) . " seatgroups \n\n";
   }
 
@@ -49,19 +45,17 @@ class FCinema
  
   private function sortAvailableSeatGroupsByDescValue(){
     $temp = $this->availableSeatGroups;
-        uksort($this->availableSeatGroups, function ($a,$b) use ($temp) {
-            if ($temp[$a] === $temp[$b]) {
-                return $a - $b;
-            }
-            return $temp[$b] - $temp[$a];
-        });
+    uksort($this->availableSeatGroups, function ($a,$b) use ($temp) {
+        if ($temp[$a] === $temp[$b]) {
+            return $a - $b;
+        }
+        return $temp[$b] - $temp[$a];
+    });
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 //     end of initialization     ^^
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-
 
 
   public function getSeatsForVisitors($groupSize) {
@@ -97,8 +91,6 @@ class FCinema
       unset($this->availableSeatGroups[$group]);
       return $this->reserveSeatsForVisitors($groupSize-$amount);
     }
-    
-    
   }
 
 
@@ -109,7 +101,6 @@ class FCinema
       $group = key($this->availableSeatGroups);
       return $group;
     }
-
 
     ksort($this->availableSeatGroups);
     reset($this->availableSeatGroups);
@@ -131,42 +122,28 @@ class FCinema
   
 
 
-
   public function display(){
     $free = 0;
-
     for ($i=0; $i < $this->nrOfSeats ; $i++) { 
       if ($free >0) {
         $class = array_key_exists($i, $this->seatsToReserve) ? 'new' : 'free';
-        echo '<div class="seat ' . $class . '">'
-                  . ($i + 0) . '</div>';
+        echo '<div class="seat ' . $class . '">' . ($i + 0) . '</div>';
         $free-- ;
       }
-
       elseif(array_key_exists($i, $this->availableSeatGroups)){
         $free = $this->availableSeatGroups[$i];
         $class = array_key_exists($i, $this->seatsToReserve) ? 'new' : 'free';
-        
-        echo '<div class="seat ' . $class . '">'
-                  . ($i + 0) . '</div>';
-
+        echo '<div class="seat ' . $class . '">' . ($i + 0) . '</div>';
         $free-- ;
-
       }
-      
       elseif(array_key_exists($i, $this->takenSeatGroups)){
         $free = $this->takenSeatGroups[$i];
         $class = array_key_exists($i, $this->seatsToReserve) ? 'new' : 'free';
-        
-        echo '<div class="seat ' . $class . '">'
-                  . ($i + 0) . '</div>';
-
+        echo '<div class="seat ' . $class . '">' . ($i + 0) . '</div>';
         $free-- ;
-
       }
       else{
-        echo '<div class="seat taken">'
-                  . ($i + 0) . '</div>';
+        echo '<div class="seat taken">' . ($i + 0) . '</div>';
       }  
     }
 

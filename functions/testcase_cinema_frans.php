@@ -4,105 +4,57 @@ class FCinema
 {
 
   private $nrOfSeats            = 0;
-  private $seats                = "";
   private $takenSeats           = 0;
   private $availableSeatGroups  = [];
+  private $takenSeatGroups      = [];
   private $seatsToReserve       = [];
 
 
   public function __construct($nrOfSeats = 20){
     $this->nrOfSeats = $nrOfSeats;
-    $this->createSeats();
-    //echo "$this->seats \n";
-    //echo intval(substr($this->seats, 2,1)) ."";
-    $this->determineAvailableSeatGroups();
-    //$this->sortAvailableSeatGroupsByDescValue();
-    // print_r($this->availableSeatGroups);
+    $this->createSeatsAndDetermineAvailableGroups();
+    $this->sortAvailableSeatGroupsByDescValue();
+ 
+    //print_r($this->availableSeatGroups);
 
-    // $s ="-,-,-,-,-,10,-,5";
-    // $number  = strtok($this->seats, ",");
-    // echo $number . "\n"; 
-    // while ($number != FALSE) {
-    //   $number = strtok( ",");
-    //   echo $number . "\n"; 
-    // }
-
-    // $this->availableSeatGroups = array_reverse($this->availableSeatGroups, true);
-    // reset($this->availableSeatGroups);
-    //  do {
-    // list($key, $value) = each($this->availableSeatGroups); 
-    // echo $key ." " . $value . "\n";
-    // prev($this->availableSeatGroups);
-    // } while (next($this->availableSeatGroups)!=FALSE);
 
   }
 
 
-  private function createSeats(){
-    $time_start = microtime(true);
-
-    $str = "";
+  private function createSeatsAndDetermineAvailableGroups(){
+    
     $counter        = 0;
-      
+
     for ($i = 0; $i < $this->nrOfSeats; $i++) {
 
       if (rand(1, 4) == 1) {
-        $str =  $counter == 0 ? "-," : "{$counter},-,";
-        $this->seats = "$this->seats{$str}" ;
+        if ($counter > 0 ){
+          $this->availableSeatGroups[$i-$counter] = $counter;
+        } 
         $this->takenSeats++;
         $counter = 0;
         continue;
       }
       $counter++;
     }
-    $counter>0 ? $this->seats = ",$this->seats{$counter}" : null;
-
-    $time_end = microtime(true);
-    echo "\n\nseat maken : " . ($time_end - $time_start) . " seconden \n\n" ;
-  }
-
-
-  private function determineAvailableSeatGroups() {
-    $indexFix= 0;
-    $i = 0;
-    $skip_i = 0;
-    $number= 0;
-
-    $val  = strtok($this->seats, ","); 
-    while ($val !== false) {
-      
-       if ($val != "-"){
-        $number = intval($val);
-        $skip_i = strlen($val)-1;
-        $this->availableSeatGroups[$i+$indexFix] = $number;
-        $indexFix += $number - $skip_i -1;
-      } 
-      $i += $skip_i +1;
-      $val = strtok( ",");
-    }
-
+    if ($counter > 0 ){
+      $this->availableSeatGroups[$i-$counter] = $counter;
+    } 
 
     
-    $this->sortAvailableSeatGroupsByDescValue();
-    
-    
-
-
     echo count($this->availableSeatGroups) . " seatgroups \n\n";
-
   }
 
 
+ 
   private function sortAvailableSeatGroupsByDescValue(){
-     ksort($this->availableSeatGroups);
-     arsort($this->availableSeatGroups);
-    // $temp = $this->availableSeatGroups;
-    //     uksort($this->availableSeatGroups, function ($a,$b) use ($temp) {
-    //         if ($temp[$a] === $temp[$b]) {
-    //             return $a - $b;
-    //         }
-    //         return $temp[$b] - $temp[$a];
-    //     });
+    $temp = $this->availableSeatGroups;
+        uksort($this->availableSeatGroups, function ($a,$b) use ($temp) {
+            if ($temp[$a] === $temp[$b]) {
+                return $a - $b;
+            }
+            return $temp[$b] - $temp[$a];
+        });
   }
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -141,6 +93,7 @@ class FCinema
       $amount = $groupSize >= $this->availableSeatGroups[$group] ? $this->availableSeatGroups[$group] : $groupSize; 
       //echo " place " . $amount ." in group starting at: " . $group . "\n";
       $this->reserveSeats($group, $group + $amount);
+      $this->takenSeatGroups[$group] = $amount;
       unset($this->availableSeatGroups[$group]);
       return $this->reserveSeatsForVisitors($groupSize-$amount);
     }
@@ -152,7 +105,6 @@ class FCinema
   private function getBestSeatGroupToPlaceVisitors($groupSize) {
     reset($this->availableSeatGroups);
     $firstGroupSize = current($this->availableSeatGroups);
-    //echo $firstGroupSize . " first group size\n";
     if ( $groupSize > $firstGroupSize ){
       $group = key($this->availableSeatGroups);
       return $group;
@@ -182,46 +134,43 @@ class FCinema
 
   public function display(){
     $output ="";
-    $counter =0;
+    $free = 0;
 
-    $indexFix= 0;
-    $i = 0;
-    $skip_i = 0;
+    for ($i=0; $i < $this->nrOfSeats ; $i++) { 
+      if ($free >0) {
+        $class = array_key_exists($i, $this->seatsToReserve) ? 'new' : 'free';
+        $output .= '<div class="seat ' . $class . '">'
+                  . ($i + 0) . '</div>';
+        $free-- ;
+      }
 
-    $val  = strtok($this->seats, ","); 
-    while ($val !== false) {
-      
-     
-      if ($val != "-"){
-        $number = intval($val);
-        $skip_i = strlen($val)-1;
-      
-        for ($j=0; $j < $number; $j++){
-          $class = array_key_exists($counter, $this->seatsToReserve) ? 'new' : 'free';
-          $output .= '<div class="seat ' . $class . '">'
-                  . ($counter + 0) . '</div>';
-          $counter++;
-        }
+      elseif(array_key_exists($i, $this->availableSeatGroups)){
+        $free = $this->availableSeatGroups[$i];
+        $class = array_key_exists($i, $this->seatsToReserve) ? 'new' : 'free';
         
-        $indexFix += $number - $skip_i -1;
+        $output .= '<div class="seat ' . $class . '">'
+                  . ($i + 0) . '</div>';
+
+        $free-- ;
+
+      }
+      
+      elseif(array_key_exists($i, $this->takenSeatGroups)){
+        $free = $this->takenSeatGroups[$i];
+        $class = array_key_exists($i, $this->seatsToReserve) ? 'new' : 'free';
+        
+        $output .= '<div class="seat ' . $class . '">'
+                  . ($i + 0) . '</div>';
+
+        $free-- ;
+
       }
       else{
-        $class = 'taken' ;
-        $output .= '<div class="seat ' . $class . '">'
-                . ($counter + 0) . '</div>';
-        $counter++;
-      }
+        $output .= '<div class="seat taken">'
+                  . ($i + 0) . '</div>';
+      }  
+    }
 
-      
-
-      $i += $skip_i +1;
-      $val = strtok( ",");
-    } 
-      
-
-
-    
-   
     return $output;
   }
 

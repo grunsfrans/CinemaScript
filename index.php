@@ -19,8 +19,8 @@ require 'functions/testcase_cinema_frans.php';
 <pre>
 <?php
 
-$roomSize = 1100000;
-$groupSize = 5000;
+$roomSize = 2500000;
+$groupSize = 200000;
   
 $time_start_cinema = microtime(true);
 $cinema = new FCinema($roomSize);
@@ -38,7 +38,7 @@ $time_end = microtime(true);
 </pre>
 
 <div id="cinema">
-   <?php echo $cinema->display();
+   <?php //echo $cinema->display();
    ?>
 </div>
 <p>&nbsp; </p>

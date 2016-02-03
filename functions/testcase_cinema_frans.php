@@ -133,13 +133,12 @@ class FCinema
 
 
   public function display(){
-    $output ="";
     $free = 0;
 
     for ($i=0; $i < $this->nrOfSeats ; $i++) { 
       if ($free >0) {
         $class = array_key_exists($i, $this->seatsToReserve) ? 'new' : 'free';
-        $output .= '<div class="seat ' . $class . '">'
+        echo '<div class="seat ' . $class . '">'
                   . ($i + 0) . '</div>';
         $free-- ;
       }
@@ -148,7 +147,7 @@ class FCinema
         $free = $this->availableSeatGroups[$i];
         $class = array_key_exists($i, $this->seatsToReserve) ? 'new' : 'free';
         
-        $output .= '<div class="seat ' . $class . '">'
+        echo '<div class="seat ' . $class . '">'
                   . ($i + 0) . '</div>';
 
         $free-- ;
@@ -159,19 +158,18 @@ class FCinema
         $free = $this->takenSeatGroups[$i];
         $class = array_key_exists($i, $this->seatsToReserve) ? 'new' : 'free';
         
-        $output .= '<div class="seat ' . $class . '">'
+        echo '<div class="seat ' . $class . '">'
                   . ($i + 0) . '</div>';
 
         $free-- ;
 
       }
       else{
-        $output .= '<div class="seat taken">'
+        echo '<div class="seat taken">'
                   . ($i + 0) . '</div>';
       }  
     }
 
-    return $output;
   }
 
 }

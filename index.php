@@ -38,7 +38,7 @@ $time_end = microtime(true);
 </pre>
 
 <div id="cinema">
-   <?php //echo $cinema->display();
+   <?php  $cinema->display();
    ?>
 </div>
 <p>&nbsp; </p>
